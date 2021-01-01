@@ -1,6 +1,7 @@
 const {
-  fraction,
+  showFraction,
+  showPeriods,
 } = require('./utils.js');
 
-const f = fraction(1, 31, 40);
-console.log(f.fraction);
+showFraction(9, 43);
+showPeriods(100);
