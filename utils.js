@@ -9,6 +9,15 @@ const freqDist = (array) => {
   return countObj;
 };
 
+const showDigitFreq = (array) => {
+  const countObj = freqDist(array);
+  const digitFreqString = [];
+
+  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((d) => digitFreqString.push(countObj[d] || 0));
+
+  return digitFreqString.join(',');
+};
+
 const isPrime = (n) => {
   for (let i = 2, s = Math.sqrt(n); i <= s; i += 1) {
     if (n % i === 0) {
@@ -105,12 +114,12 @@ const fraction = (a, b, n = 500) => {
 const showFraction = (a, b) => {
   const f = fraction(a, b);
 
-  console.log('Nominator   :', f.nominator);
-  console.log('Denominator :', f.denominator);
-  console.log('Fraction    :', f.fractionString);
-  console.log('RepValue    :', f.fractionRepeat.join(''));
-  console.log('Rep Length  :', f.repeatLength);
-  console.log('Rep FreqDist:', freqDist(f.fractionRepeat));
+  console.log('Nominator     :', f.nominator);
+  console.log('Denominator   :', f.denominator);
+  console.log('Fraction      :', f.fractionString);
+  console.log('RepValue      :', f.fractionRepeat.join(''));
+  console.log('Rep Length    :', f.repeatLength);
+  console.log('RepDigit Freq :', showDigitFreq(f.fractionRepeat));
 };
 
 const showPeriods = (n) => {
@@ -118,7 +127,7 @@ const showPeriods = (n) => {
 
   for (let i = 1; i <= n; i += 1) {
     const f = fraction(1, i);
-    console.log(i, ' , ', f.repeatLength, ' , ', f.fractionRepeat.join(''));
+    console.log(i.toString().padStart(3), isPrimeStar(i).padStart(1), ' , ', f.repeatLength.toString().padStart(3), ' , ', showDigitFreq(f.fractionRepeat));
   }
 };
 
