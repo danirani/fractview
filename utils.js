@@ -19,71 +19,86 @@ const isPrime = (n) => {
   return (n > 1);
 };
 
-const fraction = (a, b, n = 50) => {
-  const repValues = [];
-  const repRemains = [];
-  let fullFraction = '';
+const isPrimeStar = (n) => (isPrime(n) ? '*' : '');
 
-  const longDivision = (nominator, denominator) => {
-    const quotientArray = [];
-    const remainderArray = [];
+const longDivision = (nominator, denominator, maxDecimalPlaces) => {
+  const quotientArray = [];
+  const remainderArray = [];
 
-    let curNom = nominator;
-    let curRem;
-    let cycleStart;
-    let cycleEnd;
-    let count = 0;
+  const fractionInteger = Math.floor(nominator / denominator);
+  const fractionNoRepeat = [];
+  const fractionRepeat = [];
 
-    do {
-      quotientArray.push(Math.floor(curNom / denominator));
-      remainderArray.push(curNom % denominator);
+  let curNom = nominator;
+  let curRem;
+  let cycleStart;
+  let cycleEnd;
+  let count = 0;
 
-      curRem = remainderArray[remainderArray.length - 1];
-      curNom = curRem * 10;
-
-      cycleStart = remainderArray.indexOf(curRem);
-      cycleEnd = remainderArray.length - 1;
-
-      if (curRem === 0) {
-        repValues.push(quotientArray.slice(1).join(''));
-      }
-
-      if (cycleStart !== cycleEnd) {
-        for (let i = cycleStart; i < cycleEnd; i += 1) {
-          repValues.push(quotientArray[i + 1]);
-          repRemains.push(remainderArray[i]);
-        }
-
-        // console.log(cycleStart, ' , ' ,cycleEnd, ' , ', remainderArray);
-      }
-
-      count += 1;
-    } while (count < 200 && !repValues.length);
-  };
-
-  const createFraction = () => {
-    const intValue = Math.floor(a / b);
-    if (repValues.length) {
-      fullFraction = `${intValue}.${repValues.join('')}|${repValues.slice(0, 4).join('')} ...`;
-    } else {
-      fullFraction = `${intValue}`;
+  const createFractionString = () => {
+    if (fractionRepeat.length) {
+      return `${fractionInteger}.${fractionNoRepeat.join('')}${fractionRepeat.join('')}|${fractionRepeat.slice(0, 4).join('')}...`;
     }
+
+    // a repeating period has not been within the defined maximum
+    // decimal places, so display only non-repeating fraction.
+
+    return `${fractionInteger}.${fractionNoRepeat.join('')}${fractionRepeat.join('')}...`;
   };
 
-  if (b > 0) {
-    longDivision(a, b, n);
-    createFraction();
-  }
+  do {
+    quotientArray.push(Math.floor(curNom / denominator));
+    remainderArray.push(curNom % denominator);
+
+    curRem = remainderArray[remainderArray.length - 1];
+    curNom = curRem * 10;
+
+    // check if the current remainder has been encountered
+    // on a previous occasion. If so, a repeating decimal
+    // fraction has been detected.
+
+    cycleStart = remainderArray.indexOf(curRem);
+    cycleEnd = remainderArray.length - 1;
+
+    count += 1;
+
+    if (cycleStart !== cycleEnd) {
+      for (let i = 0; i < cycleStart; i += 1) {
+        fractionNoRepeat.push(quotientArray[i + 1]);
+      }
+
+      for (let i = cycleStart; i < cycleEnd; i += 1) {
+        fractionRepeat.push(quotientArray[i + 1]);
+      }
+    } else if (count > maxDecimalPlaces) {
+      // a repeating period has not been found over
+      // the defined maximum number of decimal places.
+
+      for (let i = 0; i < cycleEnd; i += 1) {
+        fractionNoRepeat.push(quotientArray[i + 1]);
+      }
+    }
+  } while (count <= maxDecimalPlaces && !fractionRepeat.length);
 
   return {
-    repValues,
-    repRemains,
-    fullFraction,
-    frequency: freqDist(repValues),
-    repLength: repValues.length,
-    fraction: repValues.join(''),
+    fractionInteger,
+    fractionNoRepeat,
+    fractionRepeat,
+    fractionString: createFractionString(),
+  };
+};
+
+const fraction = (a, b, n = 500) => {
+  const d = longDivision(a, b, n);
+
+  return {
     nominator: a,
     denominator: b,
+    fractionString: d.fractionString,
+    fractionRepeat: d.fractionRepeat,
+    fractionNoRepeat: d.fractionNoRepeat,
+    frequency: freqDist(d.fractionRepeat),
+    repeatLength: d.fractionRepeat.length,
   };
 };
 
@@ -92,17 +107,18 @@ const showFraction = (a, b) => {
 
   console.log('Nominator   :', f.nominator);
   console.log('Denominator :', f.denominator);
-  console.log('Fraction    :', f.fullFraction);
-  console.log('RepValue    :', f.repValues.join(''));
-  console.log('Rep Length  :', f.repLength);
+  console.log('Fraction    :', f.fractionString);
+  console.log('RepValue    :', f.fractionRepeat.join(''));
+  console.log('Rep Length  :', f.repeatLength);
+  console.log('Rep FreqDist:', freqDist(f.fractionRepeat));
 };
 
 const showPeriods = (n) => {
-  // period of decimal representation of 1/n
+  // show the repeating decimal for reciprocals in the range 1..n
 
   for (let i = 1; i <= n; i += 1) {
     const f = fraction(1, i);
-    console.log(i, ' , ', f.repLength);
+    console.log(i, ' , ', f.repeatLength, ' , ', f.fractionRepeat.join(''));
   }
 };
 
@@ -111,6 +127,7 @@ module.exports = {
   ave,
   freqDist,
   isPrime,
+  isPrimeStar,
   fraction,
   showFraction,
   showPeriods,
