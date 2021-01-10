@@ -1,7 +1,7 @@
-const sum = (array) => array.reduce((a, b) => a + b, 0);
-const ave = (array) => sum(array) / array.length;
+export const sum = (array) => array.reduce((a, b) => a + b, 0);
+export const ave = (array) => sum(array) / array.length;
 
-const freqDist = (array) => {
+export const freqDist = (array) => {
   const countObj = {};
 
   array.forEach((x) => { countObj[x] = (countObj[x] || 0) + 1; });
@@ -9,7 +9,7 @@ const freqDist = (array) => {
   return countObj;
 };
 
-const showDigitFreq = (array) => {
+export const showDigitFreq = (array) => {
   const countObj = freqDist(array);
   const digitFreqString = [];
 
@@ -18,7 +18,7 @@ const showDigitFreq = (array) => {
   return digitFreqString.join(',');
 };
 
-const isPrime = (n) => {
+export const isPrime = (n) => {
   for (let i = 2, s = Math.sqrt(n); i <= s; i += 1) {
     if (n % i === 0) {
       return false;
@@ -28,9 +28,9 @@ const isPrime = (n) => {
   return (n > 1);
 };
 
-const isPrimeStar = (n) => (isPrime(n) ? '*' : '');
+export const isPrimeStar = (n) => (isPrime(n) ? '*' : '');
 
-const longDivision = (nominator, denominator, maxDecimalPlaces) => {
+export const longDivision = (nominator, denominator, maxDecimalPlaces) => {
   const quotientArray = [];
   const remainderArray = [];
 
@@ -97,7 +97,7 @@ const longDivision = (nominator, denominator, maxDecimalPlaces) => {
   };
 };
 
-const fraction = (a, b, n = 500) => {
+export const fraction = (a, b, n = 500) => {
   const d = longDivision(a, b, n);
 
   return {
@@ -111,7 +111,7 @@ const fraction = (a, b, n = 500) => {
   };
 };
 
-const showFraction = (a, b) => {
+export const showFraction = (a, b) => {
   const f = fraction(a, b);
 
   console.log('Nominator     :', f.nominator);
@@ -122,7 +122,7 @@ const showFraction = (a, b) => {
   console.log('RepDigit Freq :', showDigitFreq(f.fractionRepeat));
 };
 
-const showPeriods = (n) => {
+export const showPeriods = (n) => {
   // show the repeating decimal for reciprocals in the range 1..n
 
   for (let i = 1; i <= n; i += 1) {
@@ -131,13 +131,54 @@ const showPeriods = (n) => {
   }
 };
 
-module.exports = {
-  sum,
-  ave,
-  freqDist,
-  isPrime,
-  isPrimeStar,
-  fraction,
-  showFraction,
-  showPeriods,
+export const continuedFraction = (x, y, calcType = 'multipliers') => {
+  const remainderList = [];
+  const squareList = [];
+  const multList = [];
+  const fullList = [];
+
+  let count = 0;
+  let remainder = x * y;
+  let minimum = Math.min(x, y);
+  let maximum = Math.max(x, y);
+
+  remainderList.push(remainder);
+
+  while (remainder > 0) {
+    const multiplier = Math.floor(remainder / (minimum ** 2));
+
+    multList.push(multiplier);
+    squareList.push(minimum);
+    const fullText = `${multiplier}*${minimum}*${minimum}`;
+    fullList.push(fullText);
+
+    for (let i = 1; i <= multiplier; i += 1) {
+      remainder -= minimum ** 2;
+      remainderList.push(remainder);
+
+      // squareList.push(minimum);
+    }
+    const side1 = maximum - multiplier * minimum;
+    const side2 = minimum;
+
+    minimum = Math.min(side1, side2);
+    maximum = Math.max(side1, side2);
+
+    count += 1;
+
+    if (count >= 100) {
+      multList.push(0);
+      squareList.push(0);
+      remainderList.push(0);
+      fullList.push(0);
+      break;
+    }
+  }
+
+  if (calcType === 'multipliers') { return (multList); }
+  if (calcType === 'squares') { return (squareList); }
+  if (calcType === 'remainders') { return (remainderList); }
+  if (calcType === 'full') { return (fullList); }
+
+  return (multList);
 };

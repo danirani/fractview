@@ -1,7 +1,10 @@
-const {
+import {
   showPeriods,
   showFraction,
-} = require('./utils.js');
+  continuedFraction,
+} from './utils.js';
 
-showPeriods(233);
-showFraction(1, 233);
+// showPeriods(233);
+// showFraction(1, 233);
+
+console.log(continuedFraction(191, 61, 'full'));
